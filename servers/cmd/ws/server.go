@@ -55,6 +55,25 @@ func (s *Server) setupRoutes() {
 	s.router.Get("/ws", s.handleWebSocket)
 }
 
+type serverCloser struct {
+	server   *Server
+	httpServ *http.Server
+}
+
+func (sc *serverCloser) Close(ctx context.Context) error {
+	sc.server.logger.Info("Shutting down WebSocket server...")
+
+	// Close all active sessions
+	sc.server.sessions.Range(func(key, value interface{}) bool {
+		if sess, ok := value.(*session.Session); ok {
+			sess.Close()
+		}
+		return true
+	})
+
+	return sc.httpServ.Shutdown(ctx)
+}
+
 func (s *Server) Start(ctx context.Context, port string, listener net.Listener) (shared.Closer, error) {
 	s.server = &http.Server{
 		Handler: s.router,
@@ -67,18 +86,9 @@ func (s *Server) Start(ctx context.Context, port string, listener net.Listener) 
 		}
 	}()
 
-	return func(ctx context.Context) error {
-		s.logger.Info("Shutting down WebSocket server...")
-
-		// Close all active sessions
-		s.sessions.Range(func(key, value interface{}) bool {
-			if sess, ok := value.(*session.Session); ok {
-				sess.Close()
-			}
-			return true
-		})
-
-		return s.server.Shutdown(ctx)
+	return &serverCloser{
+		server:   s,
+		httpServ: s.server,
 	}, nil
 }
 

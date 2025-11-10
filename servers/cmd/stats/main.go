@@ -34,12 +34,13 @@ func main() {
 	defer cancel()
 
 	// Initialize Redis client
-	redisClient := inmem.NewRedisClient(redisAddr, redisPassword, redisDB)
-	if err := redisClient.Ping(ctx).Err(); err != nil {
-		logger.Error("failed to connect to Redis", "error", err)
+	// Note: Using GetClient with CacheKey for stats consumer
+	redisClient := inmem.GetClient(ctx, inmem.CacheKey)
+	if redisClient == nil {
+		logger.Error("failed to initialize Redis client")
 		os.Exit(1)
 	}
-	logger.Info("connected to Redis", "addr", redisAddr)
+	logger.Info("connected to Redis")
 
 	s := NewServer(ctx, logger, redisClient)
 
@@ -62,7 +63,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	if err := shared.WaitForGracefulExit(ctx, shutdownTimeout, s.Shutdown); err != nil {
+	if err := shared.WaitForGracefulExit(ctx, shutdownTimeout, s); err != nil {
 		logger.Error("graceful exit error", "error", err)
 		os.Exit(1)
 	}

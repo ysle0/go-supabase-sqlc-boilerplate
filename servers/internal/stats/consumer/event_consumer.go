@@ -5,13 +5,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"log/slog"
+	"sync"
 	"time"
 
 	"github.com/redis/go-redis/v9"
 	"github.com/your-org/go-monorepo-boilerplate/servers/internal/shared/consumer"
 	"github.com/your-org/go-monorepo-boilerplate/servers/internal/shared/redisstream"
 	"github.com/your-org/go-monorepo-boilerplate/servers/internal/stats"
-	"golang.org/x/sync/errgroup"
 )
 
 // Compile-time check to ensure EventConsumer implements consumer.Consumer interface
@@ -81,17 +81,21 @@ func parseEvent(msg redis.XMessage) (stats.Event, error) {
 
 // Start begins consuming events
 func (ec *EventConsumer) Start(ctx context.Context) error {
-	eg := new(errgroup.Group)
+	wg := new(sync.WaitGroup)
 
 	// Start the Redis stream consumer
-	if err := ec.consumer.ConsumeLoop(ctx, eg); err != nil {
+	if err := ec.consumer.ConsumeLoop(ctx, wg); err != nil {
 		return fmt.Errorf("failed to start consumer loop: %w", err)
 	}
 
 	// Start the event processor
-	eg.Go(func() error {
-		return ec.processEvents(ctx)
-	})
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		if err := ec.processEvents(ctx); err != nil {
+			ec.logger.Error("event processor error", "error", err)
+		}
+	}()
 
 	return nil
 }
@@ -131,8 +135,8 @@ func (ec *EventConsumer) processEvents(ctx context.Context) error {
 func (ec *EventConsumer) Shutdown(ctx context.Context) error {
 	ec.logger.Info("shutting down event consumer")
 
-	eg := new(errgroup.Group)
-	if err := ec.consumer.Shutdown(ctx, eg); err != nil {
+	wg := new(sync.WaitGroup)
+	if err := ec.consumer.Shutdown(ctx, wg); err != nil {
 		return fmt.Errorf("failed to shutdown consumer: %w", err)
 	}
 

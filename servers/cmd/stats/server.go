@@ -7,7 +7,6 @@ import (
 	"net/http"
 
 	"github.com/redis/go-redis/v9"
-	"github.com/your-org/go-monorepo-boilerplate/servers/internal/shared"
 	"github.com/your-org/go-monorepo-boilerplate/servers/internal/stats/consumer"
 )
 
@@ -55,6 +54,11 @@ func (s *Server) Shutdown(ctx context.Context) error {
 	}
 
 	return nil
+}
+
+// Close implements shared.Closer interface
+func (s *Server) Close(ctx context.Context) error {
+	return s.Shutdown(ctx)
 }
 
 func (s *Server) handleHealth(w http.ResponseWriter, r *http.Request) {

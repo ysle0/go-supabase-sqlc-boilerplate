@@ -1,10 +1,16 @@
 package shared
 
 import (
+	"context"
 	"time"
 
 	"github.com/jackc/pgx/v5/pgtype"
 )
+
+// Closer is an interface for gracefully closing resources
+type Closer interface {
+	Close(ctx context.Context) error
+}
 
 type ClassicMode struct {
 	Text        string   `json:"questionText"`

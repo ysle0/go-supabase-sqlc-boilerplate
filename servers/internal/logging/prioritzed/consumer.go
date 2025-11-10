@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/redis/go-redis/v9"
-	"github.com/your-org/go-monorepo-boilerplate/servers/internal"
 	"github.com/your-org/go-monorepo-boilerplate/servers/internal/shared"
 	"github.com/your-org/go-monorepo-boilerplate/servers/internal/shared/redisstream"
 )
@@ -26,7 +25,7 @@ type Consumer = redisstream.Consumer[LogMessage]
 // TODO: This consumer currently uses a temporary channel. It should be updated to accept
 // a proper transfer channel when the logging server is fully implemented.
 func NewConsumer(logger *slog.Logger, redisClient *redis.Client) *Consumer {
-	streamKey := internal.CreateOrUpdateQuestionStatsKey
+	streamKey := "logging:messages"
 
 	// TODO: Replace this temporary channel with a proper transfer channel
 	// when the logging server is fully implemented

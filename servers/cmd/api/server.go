@@ -66,6 +66,16 @@ func (s *Server) setupRoutes() {
 	user_profile.MapRoutes(s.router, "v1")
 }
 
+type apiServerCloser struct {
+	server     *Server
+	httpServer *http.Server
+}
+
+func (asc *apiServerCloser) Close(ctx context.Context) error {
+	asc.server.logger.Info("Shutting down API server...")
+	return asc.httpServer.Shutdown(ctx)
+}
+
 func (s *Server) Start(ctx context.Context, port string) (shared.Closer, error) {
 	listener, err := net.Listen("tcp", port)
 	if err != nil {
@@ -86,9 +96,9 @@ func (s *Server) Start(ctx context.Context, port string) (shared.Closer, error) 
 		}
 	}()
 
-	return func(ctx context.Context) error {
-		s.logger.Info("Shutting down API server...")
-		return s.httpServer.Shutdown(ctx)
+	return &apiServerCloser{
+		server:     s,
+		httpServer: s.httpServer,
 	}, nil
 }
 

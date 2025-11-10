@@ -6,6 +6,7 @@ import (
 
 	"github.com/your-org/go-monorepo-boilerplate/servers/internal/logging/non_prioritized"
 	prioritized "github.com/your-org/go-monorepo-boilerplate/servers/internal/logging/prioritzed"
+	"github.com/your-org/go-monorepo-boilerplate/servers/internal/shared"
 )
 
 type Server struct {
@@ -25,22 +26,24 @@ func NewServer(logger *slog.Logger) *Server {
 	}
 }
 
-func (s *Server) Start(ctx context.Context, port string) (func() error, error) {
+type loggingServerCloser struct {
+	server *Server
+}
+
+func (lsc *loggingServerCloser) Close(ctx context.Context) error {
+	lsc.server.logger.Info("shutting down server")
+	return lsc.server.Shutdown(ctx)
+}
+
+func (s *Server) Start(ctx context.Context, port string) (shared.Closer, error) {
 	if err := s.nonPrLogger.Start(port); err != nil {
 		s.logger.Error("failed to start logger", "error", err)
 		return nil, err
 	}
 
-	closer := func() error {
-		s.logger.Info("shutting down server")
-		if err := s.Shutdown(ctx); err != nil {
-			s.logger.Error("failed to shutdown server", "error", err)
-			return err
-		}
-		return nil
-	}
-
-	return closer, nil
+	return &loggingServerCloser{
+		server: s,
+	}, nil
 }
 
 func (s *Server) Shutdown(ctx context.Context) error {

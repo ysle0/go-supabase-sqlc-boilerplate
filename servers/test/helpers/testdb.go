@@ -8,7 +8,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/your-org/go-monorepo-boilerplate/servers/internal/outgame/feature/challenge_mode/sync"
 	sqlc "github.com/your-org/go-monorepo-boilerplate/servers/internal/shared/database/sqlc/postgres"
 )
 
@@ -16,6 +15,13 @@ import (
 type TestFixtures struct {
 	Pool    *pgxpool.Pool
 	Queries *sqlc.Queries
+}
+
+// ChallengeModeResponse represents a challenge mode response with rewards
+type ChallengeModeResponse struct {
+	StageProgress int32
+	CoinRewards   int32
+	CrownRewards  int32
 }
 
 // NewTestFixtures creates a new TestFixtures instance
@@ -151,7 +157,7 @@ func (f *TestFixtures) CreateTestChallengeStage(
 		ctx,
 		userID,
 		gameTypeID,
-		sync.ChallengeModeResponse{
+		ChallengeModeResponse{
 			StageProgress: stageNum,
 		},
 		isClaimed,
@@ -163,7 +169,7 @@ func (f *TestFixtures) CreateTestChallengeStageWithRewards(
 	ctx context.Context,
 	userID int64,
 	gameTypeID int32,
-	reqBody sync.ChallengeModeResponse,
+	reqBody ChallengeModeResponse,
 	isClaimed bool,
 ) error {
 	if _, err := f.Queries.CreateStagesWithoutCategory(ctx, sqlc.CreateStagesWithoutCategoryParams{

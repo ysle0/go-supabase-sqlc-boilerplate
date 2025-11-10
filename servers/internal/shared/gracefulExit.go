@@ -17,7 +17,7 @@ var logger = slog.New(slogcolor.NewHandler(os.Stdout, &slogcolor.Options{
 	SrcFileMode: slogcolor.ShortFile,
 }))
 
-func WaitForGracefulExit(ctx context.Context, shutdownTimeout time.Duration, closer func() error) error {
+func WaitForGracefulExit(ctx context.Context, shutdownTimeout time.Duration, closer Closer) error {
 	sigCh := make(chan os.Signal, 1)
 	signal.Notify(sigCh, syscall.SIGINT, syscall.SIGTERM)
 
@@ -30,11 +30,11 @@ func WaitForGracefulExit(ctx context.Context, shutdownTimeout time.Duration, clo
 	}
 
 	logger.Info("shutting down server...")
-	ctx, cancel := context.WithTimeout(context.Background(), shutdownTimeout)
+	shutdownCtx, cancel := context.WithTimeout(context.Background(), shutdownTimeout)
 	defer cancel()
 
 	logger.Info("shutting down server... interrupted by signal: ", "signal", sig)
-	return closer()
+	return closer.Close(shutdownCtx)
 }
 
 func WaitForGracefulExitExt(ctx context.Context, shutdownTimeout time.Duration, errCh <-chan error, closer func() error) error {
