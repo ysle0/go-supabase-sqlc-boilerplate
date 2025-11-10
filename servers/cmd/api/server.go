@@ -10,8 +10,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
-	"github.com/your-org/go-monorepo-boilerplate/servers/internal/feature/example_item"
-	"github.com/your-org/go-monorepo-boilerplate/servers/internal/repository"
+	"github.com/your-org/go-monorepo-boilerplate/servers/internal/feature/user_profile"
 	"github.com/your-org/go-monorepo-boilerplate/servers/internal/shared"
 	sharedMiddleware "github.com/your-org/go-monorepo-boilerplate/servers/internal/shared/middleware"
 )
@@ -22,7 +21,6 @@ type Server struct {
 	logger             *slog.Logger
 	httpRequestTimeout time.Duration
 	httpServer         *http.Server
-	itemHandler        *example_item.Handler
 }
 
 func NewServer(
@@ -31,17 +29,11 @@ func NewServer(
 	logger *slog.Logger,
 	httpRequestTimeout time.Duration,
 ) *Server {
-	// Initialize example feature components
-	itemRepo := repository.NewItemRepository()
-	itemService := example_item.NewItemService(itemRepo, logger)
-	itemHandler := example_item.NewHandler(itemService, logger)
-
 	s := &Server{
 		ctx:                ctx,
 		router:             router,
 		logger:             logger,
 		httpRequestTimeout: httpRequestTimeout,
-		itemHandler:        itemHandler,
 	}
 
 	s.setupMiddleware()
@@ -56,8 +48,8 @@ func (s *Server) setupMiddleware() {
 	s.router.Use(middleware.Logger)
 	s.router.Use(middleware.Recoverer)
 	s.router.Use(middleware.Timeout(s.httpRequestTimeout))
-	s.router.Use(sharedMiddleware.ExecTime)
-	s.router.Use(sharedMiddleware.ApiVersion("v1"))
+	s.router.Use(sharedMiddleware.MeasureExecTime(s.logger))
+	s.router.Use(sharedMiddleware.ApiVersionWith("v1"))
 }
 
 func (s *Server) setupRoutes() {
@@ -68,10 +60,10 @@ func (s *Server) setupRoutes() {
 	s.router.Route("/api/v1", func(r chi.Router) {
 		// Example ping endpoint
 		r.Get("/ping", s.handlePing)
-
-		// Item management routes (example CRUD)
-		example_item.RegisterRoutes(r, s.itemHandler)
 	})
+
+	// Vertical slice architecture routes
+	user_profile.MapRoutes(s.router, "v1")
 }
 
 func (s *Server) Start(ctx context.Context, port string) (shared.Closer, error) {
