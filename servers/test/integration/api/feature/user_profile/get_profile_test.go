@@ -58,7 +58,7 @@ func (s *UserProfileTestSuite) TestGetProfile_Success() {
 	// Verify profile data matches created user
 	s.Equal(user.Email, response.Data.Email, "email should match")
 	s.Equal(user.Username, response.Data.Username, "username should match")
-	s.Equal(user.DisplayName, response.Data.DisplayName, "display_name should match")
+	s.Equal(user.DisplayName.String, response.Data.DisplayName, "display_name should match")
 	s.NotZero(response.Data.CreatedAt, "created_at should not be zero")
 	s.NotZero(response.Data.UpdatedAt, "updated_at should not be zero")
 }

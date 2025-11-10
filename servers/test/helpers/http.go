@@ -16,6 +16,12 @@ type (
 		Message string `json:"message"`
 		Data    T      `json:"data"`
 	}
+
+	// ErrorResponse represents the error response structure returned by httputil.ErrWithMsg
+	ErrorResponse struct {
+		Status  string `json:"status"`
+		Message string `json:"msg"`
+	}
 )
 
 // CreateTestLogger creates a logger configured for testing with error-level output
@@ -62,6 +68,16 @@ func DecodeJSONResponse(w *httptest.ResponseRecorder, response interface{}) erro
 // DecodeStandardResponse decodes a standard API response with typed data
 func DecodeStandardResponse[T any](w *httptest.ResponseRecorder) (*StandardResponse[T], error) {
 	var response StandardResponse[T]
+	err := json.NewDecoder(w.Body).Decode(&response)
+	if err != nil {
+		return nil, err
+	}
+	return &response, nil
+}
+
+// DecodeErrorResponse decodes an error response returned by httputil.ErrWithMsg
+func DecodeErrorResponse(w *httptest.ResponseRecorder) (*ErrorResponse, error) {
+	var response ErrorResponse
 	err := json.NewDecoder(w.Body).Decode(&response)
 	if err != nil {
 		return nil, err

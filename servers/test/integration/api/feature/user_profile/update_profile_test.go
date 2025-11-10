@@ -36,7 +36,7 @@ func (s *UserProfileTestSuite) TestUpdateProfile_Success() {
 	err := publicID.Scan("550e8400-e29b-41d4-a716-446655440000")
 	s.Require().NoError(err)
 
-	user, err := s.Fixtures.CreateUser(s.Ctx, map[string]interface{}{
+	user, err := s.Fixtures.CreateUser(s.Ctx, map[string]any{
 		"public_id":    publicID,
 		"email":        "test@example.com",
 		"username":     "oldusername",
@@ -47,7 +47,7 @@ func (s *UserProfileTestSuite) TestUpdateProfile_Success() {
 	// When: Update profile
 	newUsername := "newusername"
 	newDisplayName := "New Display Name"
-	reqBody := map[string]interface{}{
+	reqBody := map[string]any{
 		"public_id":    publicID,
 		"username":     newUsername,
 		"display_name": newDisplayName,
@@ -66,13 +66,13 @@ func (s *UserProfileTestSuite) TestUpdateProfile_Success() {
 	s.Equal(newUsername, response.Data.Username, "username should be updated")
 	s.Equal(newDisplayName, response.Data.DisplayName, "display_name should be updated")
 	s.Equal(user.Email, response.Data.Email, "email should remain unchanged")
-	s.True(response.Data.UpdatedAt.After(user.UpdatedAt), "updated_at should be newer")
+	s.True(response.Data.UpdatedAt.After(user.UpdatedAt.Time), "updated_at should be newer")
 
 	// Verify database was actually updated
 	updatedUser, err := s.Fixtures.GetUserByPublicID(s.Ctx, publicID)
 	s.Require().NoError(err)
 	s.Equal(newUsername, updatedUser.Username, "database username should be updated")
-	s.Equal(newDisplayName, updatedUser.DisplayName, "database display_name should be updated")
+	s.Equal(newDisplayName, updatedUser.DisplayName.String, "database display_name should be updated")
 }
 
 // TestUpdateProfile_PartialUpdate는 일부 필드만 수정할 수 있는지 검증합니다.
@@ -126,7 +126,7 @@ func (s *UserProfileTestSuite) TestUpdateProfile_PartialUpdate() {
 
 	// Verify only username was updated
 	s.Equal(newUsername, response.Data.Username, "username should be updated")
-	s.Equal(user.DisplayName, response.Data.DisplayName, "display_name should remain unchanged")
+	s.Equal(user.DisplayName.String, response.Data.DisplayName, "display_name should remain unchanged")
 }
 
 // TestUpdateProfile_TransactionRollback는 트랜잭션 롤백이 올바르게 동작하는지 검증합니다.
@@ -189,5 +189,5 @@ func (s *UserProfileTestSuite) TestUpdateProfile_TransactionRollback() {
 	unchangedUser, err := s.Fixtures.GetUserByPublicID(s.Ctx, publicID1)
 	s.Require().NoError(err)
 	s.Equal(user1.Username, unchangedUser.Username, "username should not be changed due to rollback")
-	s.Equal(user1.DisplayName, unchangedUser.DisplayName, "display_name should not be changed")
+	s.Equal(user1.DisplayName.String, unchangedUser.DisplayName.String, "display_name should not be changed")
 }

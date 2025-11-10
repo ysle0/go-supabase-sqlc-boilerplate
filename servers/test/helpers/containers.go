@@ -112,6 +112,34 @@ func CreateSupabaseRoles(ctx context.Context, pool *pgxpool.Pool) error {
 	return nil
 }
 
+// getProjectRoot returns the project root directory
+func getProjectRoot() string {
+	// Get current working directory
+	cwd, err := os.Getwd()
+	if err != nil {
+		// Fallback to relative path
+		return filepath.Join("..", "..", "..")
+	}
+
+	// Walk up until we find the go.mod file or reach max depth
+	dir := cwd
+	for i := 0; i < 10; i++ {
+		if _, err := os.Stat(filepath.Join(dir, "go.mod")); err == nil {
+			// Found the project root (servers directory), go up one more level
+			return filepath.Dir(dir)
+		}
+		parent := filepath.Dir(dir)
+		if parent == dir {
+			// Reached filesystem root
+			break
+		}
+		dir = parent
+	}
+
+	// Fallback to relative path from servers/test/...
+	return filepath.Join("..", "..", "..")
+}
+
 // RunSchemaFile executes a single schema SQL file
 func RunSchemaFile(ctx context.Context, pool *pgxpool.Pool, schemaPath string) error {
 	// Create Supabase roles first
@@ -206,8 +234,8 @@ func SetupTestContainers(ctx context.Context) (*TestContainers, error) {
 	}
 	tc.DBPool = pool
 
-	// Run schema.sql instead of migrations (migrations have game_stages, but queries expect stages)
-	schemaPath := "/Users/ysl/bedrijf/spreadit/server/supabase/schemas/schema.sql"
+	// Run schema.sql for setting up database schema
+	schemaPath := filepath.Join(getProjectRoot(), "supabase", "schemas", "schema.sql")
 	if err := RunSchemaFile(ctx, pool, schemaPath); err != nil {
 		_ = tc.Cleanup(ctx)
 		return nil, fmt.Errorf("failed to run schema: %w", err)
