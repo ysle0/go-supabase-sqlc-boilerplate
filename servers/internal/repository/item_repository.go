@@ -1,4 +1,4 @@
-package example_feature
+package repository
 
 import (
 	"context"
@@ -7,34 +7,45 @@ import (
 	"time"
 )
 
-// Repository handles data persistence for items
+// Item represents a simple item entity
+type Item struct {
+	ID          int64     `json:"id"`
+	Name        string    `json:"name"`
+	Description string    `json:"description"`
+	Price       float64   `json:"price"`
+	Quantity    int       `json:"quantity"`
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
+}
+
+// ItemRepository handles data persistence for items
 // In a real implementation, this would interact with a database (PostgreSQL, etc.)
-type Repository struct {
-	mu    sync.RWMutex
-	items map[int64]*Item
+type ItemRepository struct {
+	mu     sync.RWMutex
+	items  map[int64]*Item
 	nextID int64
 }
 
-// NewRepository creates a new item repository
-func NewRepository() *Repository {
-	return &Repository{
-		items: make(map[int64]*Item),
+// NewItemRepository creates a new item repository
+func NewItemRepository() *ItemRepository {
+	return &ItemRepository{
+		items:  make(map[int64]*Item),
 		nextID: 1,
 	}
 }
 
 // Create creates a new item
-func (r *Repository) Create(ctx context.Context, req CreateItemRequest) (*Item, error) {
+func (r *ItemRepository) Create(ctx context.Context, name, description string, price float64, quantity int) (*Item, error) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
 	now := time.Now()
 	item := &Item{
 		ID:          r.nextID,
-		Name:        req.Name,
-		Description: req.Description,
-		Price:       req.Price,
-		Quantity:    req.Quantity,
+		Name:        name,
+		Description: description,
+		Price:       price,
+		Quantity:    quantity,
 		CreatedAt:   now,
 		UpdatedAt:   now,
 	}
@@ -46,7 +57,7 @@ func (r *Repository) Create(ctx context.Context, req CreateItemRequest) (*Item, 
 }
 
 // GetByID retrieves an item by ID
-func (r *Repository) GetByID(ctx context.Context, id int64) (*Item, error) {
+func (r *ItemRepository) GetByID(ctx context.Context, id int64) (*Item, error) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 
@@ -61,7 +72,7 @@ func (r *Repository) GetByID(ctx context.Context, id int64) (*Item, error) {
 }
 
 // List retrieves all items with pagination
-func (r *Repository) List(ctx context.Context, page, pageSize int) ([]Item, int64, error) {
+func (r *ItemRepository) List(ctx context.Context, page, pageSize int) ([]Item, int64, error) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 
@@ -86,7 +97,7 @@ func (r *Repository) List(ctx context.Context, page, pageSize int) ([]Item, int6
 }
 
 // Update updates an existing item
-func (r *Repository) Update(ctx context.Context, id int64, req UpdateItemRequest) (*Item, error) {
+func (r *ItemRepository) Update(ctx context.Context, id int64, name, description *string, price *float64, quantity *int) (*Item, error) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
@@ -96,17 +107,17 @@ func (r *Repository) Update(ctx context.Context, id int64, req UpdateItemRequest
 	}
 
 	// Update only provided fields
-	if req.Name != nil {
-		item.Name = *req.Name
+	if name != nil {
+		item.Name = *name
 	}
-	if req.Description != nil {
-		item.Description = *req.Description
+	if description != nil {
+		item.Description = *description
 	}
-	if req.Price != nil {
-		item.Price = *req.Price
+	if price != nil {
+		item.Price = *price
 	}
-	if req.Quantity != nil {
-		item.Quantity = *req.Quantity
+	if quantity != nil {
+		item.Quantity = *quantity
 	}
 	item.UpdatedAt = time.Now()
 
@@ -115,7 +126,7 @@ func (r *Repository) Update(ctx context.Context, id int64, req UpdateItemRequest
 }
 
 // Delete deletes an item by ID
-func (r *Repository) Delete(ctx context.Context, id int64) error {
+func (r *ItemRepository) Delete(ctx context.Context, id int64) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 

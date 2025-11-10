@@ -1,4 +1,4 @@
-package example_feature
+package example_item
 
 import (
 	"encoding/json"
@@ -11,27 +11,16 @@ import (
 
 // Handler handles HTTP requests for items
 type Handler struct {
-	service *Service
+	service *ItemService
 	logger  *slog.Logger
 }
 
 // NewHandler creates a new item handler
-func NewHandler(service *Service, logger *slog.Logger) *Handler {
+func NewHandler(service *ItemService, logger *slog.Logger) *Handler {
 	return &Handler{
 		service: service,
 		logger:  logger,
 	}
-}
-
-// RegisterRoutes registers all item routes
-func (h *Handler) RegisterRoutes(r chi.Router) {
-	r.Route("/items", func(r chi.Router) {
-		r.Get("/", h.ListItems)
-		r.Post("/", h.CreateItem)
-		r.Get("/{id}", h.GetItem)
-		r.Put("/{id}", h.UpdateItem)
-		r.Delete("/{id}", h.DeleteItem)
-	})
 }
 
 // CreateItem handles POST /items

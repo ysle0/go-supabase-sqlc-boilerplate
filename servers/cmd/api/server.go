@@ -10,7 +10,8 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
-	"github.com/your-org/go-monorepo-boilerplate/servers/internal/example_feature"
+	"github.com/your-org/go-monorepo-boilerplate/servers/internal/feature/example_item"
+	"github.com/your-org/go-monorepo-boilerplate/servers/internal/repository"
 	"github.com/your-org/go-monorepo-boilerplate/servers/internal/shared"
 	sharedMiddleware "github.com/your-org/go-monorepo-boilerplate/servers/internal/shared/middleware"
 )
@@ -21,7 +22,7 @@ type Server struct {
 	logger             *slog.Logger
 	httpRequestTimeout time.Duration
 	httpServer         *http.Server
-	itemHandler        *example_feature.Handler
+	itemHandler        *example_item.Handler
 }
 
 func NewServer(
@@ -31,9 +32,9 @@ func NewServer(
 	httpRequestTimeout time.Duration,
 ) *Server {
 	// Initialize example feature components
-	itemRepo := example_feature.NewRepository()
-	itemService := example_feature.NewService(itemRepo, logger)
-	itemHandler := example_feature.NewHandler(itemService, logger)
+	itemRepo := repository.NewItemRepository()
+	itemService := example_item.NewItemService(itemRepo, logger)
+	itemHandler := example_item.NewHandler(itemService, logger)
 
 	s := &Server{
 		ctx:                ctx,
@@ -69,7 +70,7 @@ func (s *Server) setupRoutes() {
 		r.Get("/ping", s.handlePing)
 
 		// Item management routes (example CRUD)
-		s.itemHandler.RegisterRoutes(r)
+		example_item.RegisterRoutes(r, s.itemHandler)
 	})
 }
 
