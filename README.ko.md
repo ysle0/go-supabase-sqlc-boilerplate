@@ -1,4 +1,4 @@
-# Go 마이크로서비스 보일러플레이트
+# Go, Supabase + SQLC 보일러플레이트
 
 Vertical Slice Architecture와 Supabase를 활용한 프로덕션 레디 Go 마이크로서비스 보일러플레이트
 

@@ -1,6 +1,6 @@
-# Go Microservices Boilerplate
+# Go Supabase with SQLC Boilerplate
 
-Production-ready Go microservices boilerplate with Vertical Slice Architecture and Supabase integration
+Production-ready Go boilerplate with Vertical Slice Architecture and Supabase integration
 
 [![English](https://img.shields.io/badge/lang-English-blue.svg)](README.md)
 [![한국어](https://img.shields.io/badge/lang-한국어-red.svg)](README.ko.md)
