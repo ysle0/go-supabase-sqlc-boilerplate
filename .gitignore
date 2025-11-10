@@ -1,0 +1,45 @@
+# Binaries
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Test binaries
+*.test
+
+# Build artifacts
+/build/
+/dist/
+/servers/bin/
+/servers/build/*/tmp/
+**/tmp/
+
+# Environment
+.env
+.env.local
+*.env
+!.env.example
+
+# Dependencies
+/vendor/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Credentials
+credentials.json
+token.json
+
+# Coverage
+*.out
+coverage.*
+
+# Logs
+*.log
