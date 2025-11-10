@@ -8,10 +8,14 @@ import (
 	"time"
 
 	"github.com/redis/go-redis/v9"
+	"github.com/your-org/go-monorepo-boilerplate/servers/internal/shared/consumer"
 	"github.com/your-org/go-monorepo-boilerplate/servers/internal/shared/redisstream"
 	"github.com/your-org/go-monorepo-boilerplate/servers/internal/stats"
 	"golang.org/x/sync/errgroup"
 )
+
+// Compile-time check to ensure EventConsumer implements consumer.Consumer interface
+var _ consumer.Consumer = (*EventConsumer)(nil)
 
 // EventConsumer consumes events from Redis Streams and processes them
 type EventConsumer struct {

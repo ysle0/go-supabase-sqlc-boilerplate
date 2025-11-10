@@ -8,7 +8,15 @@ import (
 	"sync"
 	"time"
 
+	"github.com/your-org/go-monorepo-boilerplate/servers/internal/shared/consumer"
 	"github.com/your-org/go-monorepo-boilerplate/servers/internal/stats"
+)
+
+// Compile-time checks to ensure EventProcessor implements the required interfaces
+var (
+	_ consumer.Processor[stats.Event]                            = (*EventProcessor)(nil)
+	_ consumer.MetricsProvider[stats.MetricsSummary]              = (*EventProcessor)(nil)
+	_ consumer.ProcessorWithMetrics[stats.Event, stats.MetricsSummary] = (*EventProcessor)(nil)
 )
 
 // EventProcessor processes and aggregates events

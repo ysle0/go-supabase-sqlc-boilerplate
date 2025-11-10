@@ -10,6 +10,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/your-org/go-monorepo-boilerplate/servers/internal/example_feature"
 	"github.com/your-org/go-monorepo-boilerplate/servers/internal/shared"
 	sharedMiddleware "github.com/your-org/go-monorepo-boilerplate/servers/internal/shared/middleware"
 )
@@ -20,6 +21,7 @@ type Server struct {
 	logger             *slog.Logger
 	httpRequestTimeout time.Duration
 	httpServer         *http.Server
+	itemHandler        *example_feature.Handler
 }
 
 func NewServer(
@@ -28,11 +30,17 @@ func NewServer(
 	logger *slog.Logger,
 	httpRequestTimeout time.Duration,
 ) *Server {
+	// Initialize example feature components
+	itemRepo := example_feature.NewRepository()
+	itemService := example_feature.NewService(itemRepo, logger)
+	itemHandler := example_feature.NewHandler(itemService, logger)
+
 	s := &Server{
 		ctx:                ctx,
 		router:             router,
 		logger:             logger,
 		httpRequestTimeout: httpRequestTimeout,
+		itemHandler:        itemHandler,
 	}
 
 	s.setupMiddleware()
@@ -57,8 +65,11 @@ func (s *Server) setupRoutes() {
 
 	// API v1 routes
 	s.router.Route("/api/v1", func(r chi.Router) {
-		// Example routes - replace with your actual routes
+		// Example ping endpoint
 		r.Get("/ping", s.handlePing)
+
+		// Item management routes (example CRUD)
+		s.itemHandler.RegisterRoutes(r)
 	})
 }
 
