@@ -1,0 +1,28 @@
+package event
+
+const (
+	EventTypeCoinPack1Purchase     = "CoinPack1_Purchase"
+	Eventtypecoinpack2Purchase     = "CoinPack2_Purchase"
+	EventTypeCoinPack3Purchase     = "CoinPack3_Purchase"
+	EventTypeCoinPack4Purchase     = "CoinPack4_Purchase"
+	EventTypeCoinPack5Purchase     = "CoinPack5_Purchase"
+	EventTypeCoinPack6Purchase     = "CoinPack6_Purchase"
+	EventTypeGemPack1Purchase      = "GemPack1_Purchase"
+	EventTypeGemPack2Purchase      = "GemPack2_Purchase"
+	EventTypeGemPack3Purchase      = "GemPack3_Purchase"
+	EventTypeGemPack4Purchase      = "GemPack4_Purchase"
+	EventTypeGemPack5Purchase      = "GemPack5_Purchase"
+	EventTypeGemPack6Purchase      = "GemPack6_Purchase"
+	EventTypeAddictPackPurchase    = "AddictPack_Purchase"
+	EventTypeBOGO1Purchase         = "BOGO1_Purchase"
+	EventTypeBOGO2Purchase         = "BOGO2_Purchase"
+	EventTypeSpecialOffer1Purchase = "SpecialOffer1_Purchase"
+	EventTypeLuckySpinSpin         = "LuckySpin_Spin"
+	EventTypeLuckySpinClaim        = "LuckySpin_Claim"
+	EventTypeClassicPlay           = "Classic_Play"
+	EventTypeClassicClaim          = "Classic_Claim"
+	EventTypeTrueFalsePlay         = "TrueFalse_Play"
+	EventTypeTrueFalseClaim        = "TrueFalse_Claim"
+	EventDailyRewardsClaim         = "DailyRewards_Claim"
+	EventTypeProfileSave           = "Profile_Save"
+)

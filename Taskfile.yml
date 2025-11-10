@@ -1,0 +1,268 @@
+version: '3'
+
+# Convenience wrapper for all server tasks
+# Run from server/ directory: task <command>
+# Or from anywhere: task -d /path/to/server <command>
+
+tasks:
+  # ============================================================================
+  # Build Tasks (servers/cmd/Taskfile.yml)
+  # ============================================================================
+
+  build:local-ingame:
+    desc: "Build ingame server locally"
+    dir: ./servers/cmd
+    cmds:
+      - task local-ingame
+
+  build:local-question:
+    desc: "Build question server locally"
+    dir: ./servers/cmd
+    cmds:
+      - task local-question
+
+  build:local-ranking:
+    desc: "Build ranking server locally"
+    dir: ./servers/cmd
+    cmds:
+      - task local-ranking
+
+  build:local-outgame:
+    desc: "Build outgame server locally"
+    dir: ./servers/cmd
+    cmds:
+      - task local-outgame
+
+  build:local-stats:
+    desc: "Build stats server locally"
+    dir: ./servers/cmd
+    cmds:
+      - task local-stats
+
+  build:local-logging:
+    desc: "Build logging server locally"
+    dir: ./servers/cmd
+    cmds:
+      - task local-logging
+
+  build:local-all:
+    desc: "Build all servers locally"
+    dir: ./servers/cmd
+    cmds:
+      - task all
+
+  # ============================================================================
+  # Deploy Tasks (servers/build/Taskfile.yml)
+  # ============================================================================
+
+  deploy:ingame:
+    desc: "Deploy ingame server to production"
+    dir: ./servers/build
+    cmds:
+      - task deploy-ingame
+
+  deploy:question:
+    desc: "Deploy question server to production"
+    dir: ./servers/build
+    cmds:
+      - task deploy-question
+
+  deploy:ranking:
+    desc: "Deploy ranking server to production"
+    dir: ./servers/build
+    cmds:
+      - task deploy-ranking
+
+  deploy:outgame:
+    desc: "Deploy outgame server to production"
+    dir: ./servers/build
+    cmds:
+      - task deploy-outgame
+
+  deploy:stats:
+    desc: "Deploy stats server to production"
+    dir: ./servers/build
+    cmds:
+      - task deploy-stats
+
+  deploy:all:
+    desc: "Deploy all servers to production"
+    dir: ./servers/build
+    cmds:
+      - task deploy-all
+
+  # ============================================================================
+  # Update Tasks (servers/build/Taskfile.yml)
+  # ============================================================================
+
+  update:ingame:
+    desc: "Update ingame server deployment"
+    dir: ./servers/build
+    cmds:
+      - task update-ingame
+
+  update:question:
+    desc: "Update question server deployment"
+    dir: ./servers/build
+    cmds:
+      - task update-question
+
+  update:ranking:
+    desc: "Update ranking server deployment"
+    dir: ./servers/build
+    cmds:
+      - task update-ranking
+
+  update:outgame:
+    desc: "Update outgame server deployment"
+    dir: ./servers/build
+    cmds:
+      - task update-outgame
+
+  update:stats:
+    desc: "Update stats server deployment"
+    dir: ./servers/build
+    cmds:
+      - task update-stats
+
+  update:all:
+    desc: "Update all server deployments"
+    dir: ./servers/build
+    cmds:
+      - task update-all
+
+  # ============================================================================
+  # Test Tasks (servers/test/Taskfile.yml)
+  # ============================================================================
+
+  test:all:
+    desc: "Run all tests (unit + integration + load)"
+    dir: ./servers/test
+    cmds:
+      - task test:all
+
+  test:unit:
+    desc: "Run all unit tests"
+    dir: ./servers/test
+    cmds:
+      - task test:unit
+
+  test:integration:
+    desc: "Run all integration tests"
+    dir: ./servers/test
+    cmds:
+      - task test:integration
+
+  test:load:
+    desc: "Run all load tests"
+    dir: ./servers/test
+    cmds:
+      - task test:load
+
+  test:coverage:
+    desc: "Run all tests with coverage report"
+    dir: ./servers/test
+    cmds:
+      - task test:coverage
+
+  test:outgame:
+    desc: "Run all outgame server integration tests"
+    dir: ./servers/test
+    cmds:
+      - task test:outgame
+
+  test:stats:
+    desc: "Run all stats server integration tests"
+    dir: ./servers/test
+    cmds:
+      - task test:stats
+
+  test:ingame:
+    desc: "Run all ingame server integration tests"
+    dir: ./servers/test
+    cmds:
+      - task test:ingame
+
+  test:outgame:challenge-mode:
+    desc: "Run challenge mode tests"
+    dir: ./servers/test
+    cmds:
+      - task test:outgame:challenge-mode
+
+  test:outgame:classic-mode:
+    desc: "Run classic mode tests"
+    dir: ./servers/test
+    cmds:
+      - task test:outgame:classic-mode
+
+  test:outgame:currency:
+    desc: "Run currency tests"
+    dir: ./servers/test
+    cmds:
+      - task test:outgame:currency
+
+  test:outgame:daily-rewards:
+    desc: "Run daily rewards tests"
+    dir: ./servers/test
+    cmds:
+      - task test:outgame:daily-rewards
+
+  test:outgame:event-package:
+    desc: "Run event package tests"
+    dir: ./servers/test
+    cmds:
+      - task test:outgame:event-package
+
+  test:outgame:game:
+    desc: "Run game tests"
+    dir: ./servers/test
+    cmds:
+      - task test:outgame:game
+
+  test:outgame:item:
+    desc: "Run item tests"
+    dir: ./servers/test
+    cmds:
+      - task test:outgame:item
+
+  test:outgame:lucky-spin:
+    desc: "Run lucky spin tests"
+    dir: ./servers/test
+    cmds:
+      - task test:outgame:lucky-spin
+
+  test:outgame:ranking:
+    desc: "Run ranking tests"
+    dir: ./servers/test
+    cmds:
+      - task test:outgame:ranking
+
+  test:outgame:user:
+    desc: "Run user tests"
+    dir: ./servers/test
+    cmds:
+      - task test:outgame:user
+
+  test:stats:stats:
+    desc: "Run stats feature tests"
+    dir: ./servers/test
+    cmds:
+      - task test:stats:stats
+
+  test:ingame:classic-mode:
+    desc: "Run ingame classic mode tests"
+    dir: ./servers/test
+    cmds:
+      - task test:ingame:classic-mode
+
+  test:clean:
+    desc: "Clean test artifacts and coverage reports"
+    dir: ./servers/test
+    cmds:
+      - task test:clean
+
+  test:list:
+    desc: "List all available test tasks"
+    dir: ./servers/test
+    cmds:
+      - task test:list

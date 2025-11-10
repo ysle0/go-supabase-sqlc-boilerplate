@@ -1,0 +1,24 @@
+# https://taskfile.dev
+
+version: "3"
+
+vars:
+  PROJECT: trivia-logging
+  IMG: registry.fly.io/trivia-logging:v1
+  PLATFORM: linux/amd64
+
+tasks:
+  test:
+    cmds:
+      - echo "logging test"
+
+  deploy:
+    cmds:
+      - fly deploy
+
+  update:
+    cmds:
+      - fly auth docker
+      - docker buildx build --platform {{.PLATFORM}} -t {{.IMG}} -f ./Dockerfile {{.CLI_ARGS}}
+      - docker push {{.IMG}}
+      - fly deploy --image {{.IMG}} -a {{.PROJECT}}

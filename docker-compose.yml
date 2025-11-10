@@ -1,0 +1,13 @@
+services:
+  redis:
+    image: redis:8.0
+    container_name: trivia-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/opt/redis/data/
+    command: ["redis-server", "--requirepass", "passpass123"]
+
+volumes:
+  redis-data:
+    driver: local

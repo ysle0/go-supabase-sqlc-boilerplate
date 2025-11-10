@@ -1,0 +1,17 @@
+version: "2"
+cloud:
+  project: "01K1HJEX42P5B7NPS7SNMV5962"
+sql:
+  - engine: "postgresql"
+    queries: "../../supabase/queries"
+    schema: "../../supabase/schemas/schema.sql"
+    gen:
+      go:
+        package: "sqlc"
+        sql_package: "pgx/v5"
+        out: "../internal/shared/database/sqlc/postgres"
+        emit_json_tags: true
+        emit_db_tags: true
+        emit_prepared_queries: true
+        emit_sql_as_comment: true
+        emit_all_enum_values: true

@@ -1,0 +1,6 @@
+services:
+  trivia-outgame:
+    image: registry.fly.io/trivia-logging:v1
+    ports:
+      - "8085:8085"
+    restart: "always"
