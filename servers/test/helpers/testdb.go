@@ -1070,3 +1070,117 @@ func (f *TestFixtures) SetupChallengeModeGameData(ctx context.Context, gameTypeI
 		GameTypeID: gameTypeID,
 	}, nil
 }
+
+// ============================================================================
+// User Profile Fixture Methods (for boilerplate schema)
+// ============================================================================
+
+// User represents a user in the boilerplate schema
+type User struct {
+	ID          int64
+	PublicID    pgtype.UUID
+	Email       string
+	Username    string
+	DisplayName string
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
+	DeletedAt   pgtype.Timestamptz
+}
+
+// CreateUser creates a user with flexible parameters for the boilerplate schema
+// Accepts a map with optional fields: public_id, email, username, display_name
+func (f *TestFixtures) CreateUser(ctx context.Context, params map[string]interface{}) (*User, error) {
+	// Set defaults
+	publicID := pgtype.UUID{}
+	if pid, ok := params["public_id"].(pgtype.UUID); ok {
+		publicID = pid
+	} else {
+		// Generate random UUID if not provided
+		uid := uuid.New()
+		if err := publicID.Scan(uid.String()); err != nil {
+			return nil, fmt.Errorf("failed to scan UUID: %w", err)
+		}
+	}
+
+	email := "test@example.com"
+	if e, ok := params["email"].(string); ok {
+		email = e
+	}
+
+	username := "testuser"
+	if u, ok := params["username"].(string); ok {
+		username = u
+	}
+
+	displayName := "Test User"
+	if d, ok := params["display_name"].(string); ok {
+		displayName = d
+	}
+
+	query := `
+		INSERT INTO users (public_id, email, username, display_name)
+		VALUES ($1, $2, $3, $4)
+		RETURNING id, public_id, email, username, display_name, created_at, updated_at, deleted_at
+	`
+
+	var user User
+	err := f.Pool.QueryRow(ctx, query, publicID, email, username, displayName).Scan(
+		&user.ID,
+		&user.PublicID,
+		&user.Email,
+		&user.Username,
+		&user.DisplayName,
+		&user.CreatedAt,
+		&user.UpdatedAt,
+		&user.DeletedAt,
+	)
+
+	if err != nil {
+		return nil, fmt.Errorf("failed to create user: %w", err)
+	}
+
+	return &user, nil
+}
+
+// GetUserByPublicID retrieves a user by their public ID
+func (f *TestFixtures) GetUserByPublicID(ctx context.Context, publicID pgtype.UUID) (*User, error) {
+	query := `
+		SELECT id, public_id, email, username, display_name, created_at, updated_at, deleted_at
+		FROM users
+		WHERE public_id = $1
+	`
+
+	var user User
+	err := f.Pool.QueryRow(ctx, query, publicID).Scan(
+		&user.ID,
+		&user.PublicID,
+		&user.Email,
+		&user.Username,
+		&user.DisplayName,
+		&user.CreatedAt,
+		&user.UpdatedAt,
+		&user.DeletedAt,
+	)
+
+	if err != nil {
+		return nil, fmt.Errorf("failed to get user by public ID: %w", err)
+	}
+
+	return &user, nil
+}
+
+// SoftDeleteUser soft deletes a user by setting deleted_at timestamp
+func (f *TestFixtures) SoftDeleteUser(ctx context.Context, publicID pgtype.UUID) error {
+	query := `
+		UPDATE users
+		SET deleted_at = NOW()
+		WHERE public_id = $1
+	`
+
+	_, err := f.Pool.Exec(ctx, query, publicID)
+	if err != nil {
+		return fmt.Errorf("failed to soft delete user: %w", err)
+	}
+
+	return nil
+}
