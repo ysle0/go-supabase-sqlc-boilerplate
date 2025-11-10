@@ -58,7 +58,10 @@ Production-ready Go microservices boilerplate with Vertical Slice Architecture a
 ### Data Layer
 - **Supabase**: PostgreSQL hosting and database management platform
 - **PostgreSQL**: Main database (hosted on Supabase)
-- **SQLC**: Type-safe SQL code generation
+- **SQLC**: Type-safe SQL code generation for Go and TypeScript
+  - Generates type-safe Go code from SQL queries
+  - Generates TypeScript code for Supabase Edge Functions
+  - **Note**: TypeScript generation doesn't support `:exec`, `:execrows`, `:execresult`, `:batchexec` annotations (use `:one` or `:many` instead)
 - **pgx/v5**: High-performance PostgreSQL driver
 - **Supabase CLI**: Local development environment and migration management
 
@@ -94,9 +97,12 @@ cp .env.example .env
 # 4. Install dependencies
 go mod download
 
-# 5. Generate SQLC code
+# 5. Generate type-safe code from SQL queries
 cd ..
 ./script/gen-sqlc.bash
+# This generates:
+# - Type-safe Go code for backend services (servers/internal/sql/)
+# - TypeScript types for Supabase Edge Functions (supabase/functions/_shared/queries/)
 
 # 6. (Optional) Reset database if needed
 ./script/reset-local-sb.bash
@@ -143,10 +149,15 @@ go test -v ./internal/feature/... # Run specific package tests
 
 ```bash
 # Run from repository root
-./script/gen-sqlc.bash           # Generate SQLC code
+./script/gen-sqlc.bash           # Generate type-safe Go and TypeScript code from SQL
+                                 # - Go: servers/internal/sql/ (fully supports all SQLC annotations)
+                                 # - TypeScript: supabase/functions/_shared/queries/
+                                 #   (limitations: :exec, :execrows, :execresult, :batchexec not supported)
 ./script/gen-proto.bash          # Generate Protocol Buffer code
-./script/gen-typing-sb.bash      # Generate TypeScript types
+./script/gen-typing-sb.bash      # Generate TypeScript database schema types
 ```
+
+**IMPORTANT**: When writing SQL queries for TypeScript generation, use `:one` or `:many` annotations instead of `:exec` family annotations. For queries that don't return data, use `:one` with a `RETURNING` clause or select a dummy value.
 
 ### Database Management (Supabase)
 
@@ -180,6 +191,7 @@ This project leverages Supabase as the database management platform:
 - Automated migration version control
 - Visual database management with Supabase Studio
 - Simplified production deployment
+- **Type-safe code generation**: Write SQL once, generate type-safe Go and TypeScript code automatically via `./script/gen-sqlc.bash`
 
 ## Architecture Patterns
 

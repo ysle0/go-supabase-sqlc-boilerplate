@@ -60,7 +60,10 @@ Productie-klare Go microservices boilerplate met Vertical Slice Architecture en 
 
 - **Supabase**: PostgreSQL hosting en database beheer platform
 - **PostgreSQL**: Hoofd database (gehost op Supabase)
-- **SQLC**: Type-safe SQL code generatie
+- **SQLC**: Type-safe SQL code generatie voor Go en TypeScript
+  - Genereert type-safe Go code uit SQL queries
+  - Genereert TypeScript code voor Supabase Edge Functions
+  - **Let op**: TypeScript generatie ondersteunt geen `:exec`, `:execrows`, `:execresult`, `:batchexec` annotaties (gebruik `:one` of `:many` in plaats daarvan)
 - **pgx/v5**: High-performance PostgreSQL driver
 - **Supabase CLI**: Lokale ontwikkelomgeving en migratie beheer
 
@@ -97,9 +100,12 @@ cp .env.example .env
 # 4. Dependencies installeren
 go mod download
 
-# 5. SQLC code genereren
+# 5. Type-safe code genereren uit SQL queries
 cd ..
 ./script/gen-sqlc.bash
+# Dit genereert:
+# - Type-safe Go code voor backend services (servers/internal/sql/)
+# - TypeScript types voor Supabase Edge Functions (supabase/functions/_shared/queries/)
 
 # 6. (Optioneel) Database resetten indien nodig
 ./script/reset-local-sb.bash
@@ -146,10 +152,15 @@ go test -v ./internal/feature/... # Specifieke package tests uitvoeren
 
 ```bash
 # Uitvoeren vanaf repository root
-./script/gen-sqlc.bash           # SQLC code genereren
+./script/gen-sqlc.bash           # Type-safe Go en TypeScript code genereren uit SQL
+                                 # - Go: servers/internal/sql/ (volledige ondersteuning van alle SQLC annotaties)
+                                 # - TypeScript: supabase/functions/_shared/queries/
+                                 #   (beperkingen: :exec, :execrows, :execresult, :batchexec niet ondersteund)
 ./script/gen-proto.bash          # Protocol Buffer code genereren
-./script/gen-typing-sb.bash      # TypeScript types genereren
+./script/gen-typing-sb.bash      # TypeScript database schema types genereren
 ```
+
+**BELANGRIJK**: Bij het schrijven van SQL queries voor TypeScript generatie, gebruik `:one` of `:many` annotaties in plaats van `:exec` familie annotaties. Voor queries die geen data retourneren, gebruik `:one` met een `RETURNING` clausule of selecteer een dummy waarde.
 
 ### Database Beheer (Supabase)
 
@@ -184,6 +195,7 @@ Dit project maakt gebruik van Supabase als database beheer platform:
 - Geautomatiseerd migratie versiebeheer
 - Visueel database beheer met Supabase Studio
 - Vereenvoudigde productie deployment
+- **Type-safe code generatie**: Schrijf SQL één keer, genereer automatisch type-safe Go en TypeScript code via `./script/gen-sqlc.bash`
 
 ## Architectuur Patronen
 

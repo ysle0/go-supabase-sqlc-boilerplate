@@ -58,7 +58,10 @@ Vertical Slice Architecture와 Supabase를 활용한 프로덕션 레디 Go 마�
 ### 데이터 레이어
 - **Supabase**: PostgreSQL 호스팅 및 데이터베이스 관리 플랫폼
 - **PostgreSQL**: 메인 데이터베이스 (Supabase에서 호스팅)
-- **SQLC**: 타입 안전 SQL 코드 생성
+- **SQLC**: Go와 TypeScript를 위한 타입 안전 SQL 코드 생성
+  - SQL 쿼리로부터 타입 안전 Go 코드 생성
+  - Supabase Edge Functions를 위한 TypeScript 코드 생성
+  - **주의**: TypeScript 생성은 `:exec`, `:execrows`, `:execresult`, `:batchexec` 어노테이션을 지원하지 않습니다 (대신 `:one` 또는 `:many` 사용)
 - **pgx/v5**: 고성능 PostgreSQL 드라이버
 - **Supabase CLI**: 로컬 개발 환경 및 마이그레이션 관리
 
@@ -94,9 +97,12 @@ cp .env.example .env
 # 4. 의존성 설치
 go mod download
 
-# 5. SQLC 코드 생성
+# 5. SQL 쿼리로부터 타입 안전 코드 생성
 cd ..
 ./script/gen-sqlc.bash
+# 다음을 생성합니다:
+# - 백엔드 서비스를 위한 타입 안전 Go 코드 (servers/internal/sql/)
+# - Supabase Edge Functions를 위한 TypeScript 타입 (supabase/functions/_shared/queries/)
 
 # 6. (선택) 데이터베이스 리셋이 필요한 경우
 ./script/reset-local-sb.bash
@@ -143,10 +149,15 @@ go test -v ./internal/feature/... # 특정 패키지 테스트
 
 ```bash
 # 저장소 루트에서 실행
-./script/gen-sqlc.bash           # SQLC 코드 생성
+./script/gen-sqlc.bash           # SQL로부터 타입 안전 Go 및 TypeScript 코드 생성
+                                 # - Go: servers/internal/sql/ (모든 SQLC 어노테이션 완전 지원)
+                                 # - TypeScript: supabase/functions/_shared/queries/
+                                 #   (제약사항: :exec, :execrows, :execresult, :batchexec 미지원)
 ./script/gen-proto.bash          # Protocol Buffer 코드 생성
-./script/gen-typing-sb.bash      # TypeScript 타입 생성
+./script/gen-typing-sb.bash      # TypeScript 데이터베이스 스키마 타입 생성
 ```
+
+**중요**: TypeScript 생성을 위한 SQL 쿼리 작성 시, `:exec` 계열 어노테이션 대신 `:one` 또는 `:many` 어노테이션을 사용하세요. 데이터를 반환하지 않는 쿼리의 경우, `RETURNING` 절과 함께 `:one`을 사용하거나 더미 값을 선택하세요.
 
 ### 데이터베이스 관리 (Supabase)
 
@@ -180,6 +191,7 @@ supabase db push                 # 원격 DB에 마이그레이션 적용
 - 마이그레이션 버전 관리 자동화
 - Supabase Studio로 데이터베이스 시각적 관리
 - 프로덕션 배포 간소화
+- **타입 안전 코드 생성**: SQL을 한 번 작성하면 `./script/gen-sqlc.bash`를 통해 Go와 TypeScript 타입 안전 코드를 자동 생성
 
 ## 아키텍처 패턴
 

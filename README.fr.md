@@ -60,7 +60,10 @@ Boilerplate de microservices Go prêt pour la production avec Vertical Slice Arc
 
 - **Supabase** : Hébergement PostgreSQL et plateforme de gestion de base de données
 - **PostgreSQL** : Base de données principale (hébergée sur Supabase)
-- **SQLC** : Génération de code SQL type-safe
+- **SQLC** : Génération de code SQL type-safe pour Go et TypeScript
+  - Génère du code Go type-safe à partir de requêtes SQL
+  - Génère du code TypeScript pour les Supabase Edge Functions
+  - **Note** : La génération TypeScript ne supporte pas les annotations `:exec`, `:execrows`, `:execresult`, `:batchexec` (utilisez `:one` ou `:many` à la place)
 - **pgx/v5** : Driver PostgreSQL haute performance
 - **Supabase CLI** : Environnement de développement local et gestion des migrations
 
@@ -97,9 +100,12 @@ cp .env.example .env
 # 4. Installer les dépendances
 go mod download
 
-# 5. Générer le code SQLC
+# 5. Générer du code type-safe à partir de requêtes SQL
 cd ..
 ./script/gen-sqlc.bash
+# Cela génère :
+# - Du code Go type-safe pour les services backend (servers/internal/sql/)
+# - Des types TypeScript pour les Supabase Edge Functions (supabase/functions/_shared/queries/)
 
 # 6. (Optionnel) Réinitialiser la base de données si nécessaire
 ./script/reset-local-sb.bash
@@ -146,10 +152,15 @@ go test -v ./internal/feature/... # Exécuter les tests d'un package spécifique
 
 ```bash
 # Exécuter depuis la racine du dépôt
-./script/gen-sqlc.bash           # Générer le code SQLC
+./script/gen-sqlc.bash           # Générer du code Go et TypeScript type-safe à partir de SQL
+                                 # - Go : servers/internal/sql/ (support complet de toutes les annotations SQLC)
+                                 # - TypeScript : supabase/functions/_shared/queries/
+                                 #   (limitations : :exec, :execrows, :execresult, :batchexec non supportés)
 ./script/gen-proto.bash          # Générer le code Protocol Buffer
-./script/gen-typing-sb.bash      # Générer les types TypeScript
+./script/gen-typing-sb.bash      # Générer les types de schéma de base de données TypeScript
 ```
+
+**IMPORTANT** : Lors de l'écriture de requêtes SQL pour la génération TypeScript, utilisez les annotations `:one` ou `:many` au lieu des annotations de la famille `:exec`. Pour les requêtes qui ne retournent pas de données, utilisez `:one` avec une clause `RETURNING` ou sélectionnez une valeur fictive.
 
 ### Gestion de la Base de Données (Supabase)
 
@@ -184,6 +195,7 @@ Ce projet utilise Supabase comme plateforme de gestion de base de données :
 - Contrôle de version automatisé des migrations
 - Gestion visuelle de la base de données avec Supabase Studio
 - Déploiement en production simplifié
+- **Génération de code type-safe** : Écrivez SQL une seule fois, générez automatiquement du code Go et TypeScript type-safe via `./script/gen-sqlc.bash`
 
 ## Patterns d'Architecture
 
